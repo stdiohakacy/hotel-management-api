@@ -1,7 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ConflictException } from '@nestjs/common';
+import {
+    BadRequestException,
+    ConflictException,
+    NotFoundException,
+} from '@nestjs/common';
 import { UserService } from 'src/modules/user/services/user.service';
 import { UserEntity } from 'src/modules/user/entities/user.entity';
 import { UserRegisterDTO } from 'src/modules/user/dtos/user.register.dto';
@@ -10,6 +14,7 @@ import { AppModule } from 'src/app/app.module';
 import { UserModule } from 'src/modules/user/user.module';
 import { StorageModule } from 'src/modules/storages/storage.module';
 import { AuthService } from 'src/core/auth/services/auth.service';
+import { UserActiveDTO } from 'src/modules/user/dtos/user.active.dto';
 
 describe('UserService', () => {
     let service: UserService;
@@ -34,11 +39,11 @@ describe('UserService', () => {
         );
     });
 
-    it('should be defined', () => {
+    it('Should be defined', () => {
         expect(service).toBeDefined();
     });
 
-    describe('register', () => {
+    describe('Register', () => {
         it('Should throw ConflictException if username exists', async () => {
             const existingUser = {
                 id: '0948b3a2-7f3d-4c01-8482-112898ba32bd',
@@ -85,6 +90,78 @@ describe('UserService', () => {
             const registeredUser = await service.register(registerDTO);
 
             expect(registeredUser).toEqual(savedUser);
+        });
+    });
+
+    describe('Active', () => {
+        it('Should throw NotFoundException if user is not found', async () => {
+            jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
+
+            const activeDTO: UserActiveDTO = {
+                username: 'admin',
+                activeKey:
+                    '306xjims52qarql5rzsn1p72j7yaahs7k72m9qk9ryazbnsfp1wvrcb0bwvy6hn2y9s84sfpn8qdd9zos47p0i42k86qyb4vun4o',
+            };
+
+            await expect(service.active(activeDTO)).rejects.toThrow(
+                NotFoundException
+            );
+            expect(userRepository.findOne).toHaveBeenCalledWith({
+                where: { username: activeDTO.username },
+            });
+        });
+
+        it('should throw BadRequestException if active key is invalid', async () => {
+            // Arrange
+            const userActiveDTO: UserActiveDTO = {
+                username: 'admin',
+                activeKey: 'invalid_active_key',
+            };
+
+            const mockUser = {
+                id: '0948b3a2-7f3d-4c01-8482-112898ba32bd',
+                username: 'admin',
+                activeKey:
+                    '306xjims52qarql5rzsn1p72j7yaahs7k72m9qk9ryazbnsfp1wvrcb0bwvy6hn2y9s84sfpn8qdd9zos47p0i42k86qyb4vun4o',
+                activeExpire: new Date('2024-05-31T00:00:00.000Z'),
+            } as any;
+
+            userRepository.findOne = jest.fn().mockResolvedValue(mockUser);
+
+            // Act & Assert
+            await expect(service.active(userActiveDTO)).rejects.toThrow(
+                BadRequestException
+            );
+            expect(userRepository.findOne).toHaveBeenCalledWith({
+                where: { username: userActiveDTO.username },
+            });
+        });
+
+        it('Should throw BadRequestException if active key is expired', async () => {
+            // Arrange
+            const userActiveDTO: UserActiveDTO = {
+                username: 'admin',
+                activeKey:
+                    '306xjims52qarql5rzsn1p72j7yaahs7k72m9qk9ryazbnsfp1wvrcb0bwvy6hn2y9s84sfpn8qdd9zos47p0i42k86qyb4vun4o',
+            };
+
+            const mockUser = {
+                id: '0948b3a2-7f3d-4c01-8482-112898ba32bd',
+                username: 'admin',
+                activeKey:
+                    '306xjims52qarql5rzsn1p72j7yaahs7k72m9qk9ryazbnsfp1wvrcb0bwvy6hn2y9s84sfpn8qdd9zos47p0i42k86qyb4vun4o',
+                activeExpire: new Date('2020-05-31T00:00:00.000Z'),
+            };
+
+            userRepository.findOne = jest.fn().mockResolvedValue(mockUser);
+
+            // Act & Assert
+            await expect(service.active(userActiveDTO)).rejects.toThrow(
+                BadRequestException
+            );
+            expect(userRepository.findOne).toHaveBeenCalledWith({
+                where: { username: userActiveDTO.username },
+            });
         });
     });
 });

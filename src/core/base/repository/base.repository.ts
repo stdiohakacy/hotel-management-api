@@ -1,3 +1,4 @@
+import { DeleteResult, UpdateResult } from 'typeorm';
 import { PaginationListDto } from '../../../core/pagination/dtos/pagination.list.dto';
 
 export abstract class BaseRepository<T> {

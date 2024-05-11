@@ -1,0 +1,51 @@
+version: '3'
+services:
+    # minio:
+    #     image: minio/minio
+    #     container_name: minio
+    #     ports:
+    #         - '9000:9000'
+    #         - '9001:9001'
+    #     volumes:
+    #         - ./storage:/data
+    #     environment:
+    #         MINIO_ROOT_USER: minio_admin
+    #         MINIO_ROOT_PASSWORD: cdef3456@A
+    #     command: server --console-address ":9001" /data
+
+    # redis:
+    #     image: 'redis:alpine'
+    #     ports:
+    #         - '6379:6379'
+
+    postgres:
+        image: postgres
+        container_name: postgres
+        restart: always
+        environment:
+            POSTGRES_PASSWORD: postgres
+            TZ: 'GMT'
+            PGTZ: 'GMT'
+        ports:
+            - '5432:5432'
+        # volumes:
+        # - postgres:/data/postgres
+        env_file:
+            - .env
+    pgadmin:
+        container_name: pgadmin
+        image: dpage/pgadmin4
+        ports:
+            - '8081:80'
+        # volumes:
+        # - /data/pgadmin:/root/.pgadmin
+        env_file:
+            - .env
+        links:
+            - postgres
+
+volumes:
+    postgres:
+        driver: local
+    pgadmin:
+        driver: local

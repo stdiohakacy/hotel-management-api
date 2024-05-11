@@ -1,0 +1,6 @@
+{
+    "create": "Entrance created!",
+    "error": {
+        "nameExist": "Entrance name already used"
+    }
+}

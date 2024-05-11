@@ -1,0 +1,6 @@
+{
+    "create": "Parking rate created!",
+    "error": {
+        "invalidPrice": "Price invalid!"
+    }
+}

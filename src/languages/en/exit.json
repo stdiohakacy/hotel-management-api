@@ -1,0 +1,6 @@
+{
+    "create": "Exit created!",
+    "error": {
+        "nameExist": "Exit name already used"
+    }
+}

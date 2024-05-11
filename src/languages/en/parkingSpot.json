@@ -1,0 +1,8 @@
+{
+    "create": "Parking spot created!",
+    "parkVehicle": "Parked vehicle successed!",
+    "error": {
+        "notFound": "Parking spot not found!",
+        "alreadyUsed": "Parking spot already used!"
+    }
+}

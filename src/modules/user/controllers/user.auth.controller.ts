@@ -42,10 +42,7 @@ import { IFile } from '../../../core/file/interfaces/file.interface';
 @ApiTags('modules.auth.user')
 @Controller({ version: '1', path: '/user' })
 export class UserAuthController {
-    constructor(
-        private readonly userService: UserService,
-        private readonly authService: AuthService
-    ) {}
+    constructor(private readonly userService: UserService) {}
 
     @UserAuthProfileDoc()
     @Response('user.profile', { serialization: UserProfileSerialization })
